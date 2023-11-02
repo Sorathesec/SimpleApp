@@ -1,0 +1,10 @@
+[versions]
+androidGradlePlugin = "8.1.2"
+kotlin = "1.8.10"
+composeBom = "1.9.0"
+[libraries]
+compose-bom = { group = "androidx.compose", version.ref = "composeBom" }
+compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+kotlin = { id = "org.jetbrains.kotlin.androidn", version.ref = "kotlin" }
