@@ -1,19 +1,7 @@
 package com.netaphous.testapplication.ui
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,10 +12,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
+import com.netaphous.testapplication.data.Screen
+import com.netaphous.testapplication.ui.components.RenderComponent
 
 @Composable
 fun Screen() {
@@ -39,12 +26,35 @@ fun Screen() {
         LaunchedEffect(viewModel) {
             viewModel.getJoke()
         }
-        val screenState by viewModel.jokes.collectAsState()
+        val screenState by viewModel.primer.collectAsState()
 
         when {
             screenState.showLoading -> LoadingScreen()
-            screenState.jokes.isEmpty() -> EmptyScreen()
-            else -> JokesList(screenState.jokes)
+            else -> screenState.currentScreen?.let { screen ->
+                ScreenContent(
+                    currentScreen = screen,
+                    onEvent = viewModel::onEvent,
+                    onInput = viewModel::onInput,
+                )
+            } ?: EmptyScreen()
+        }
+    }
+}
+
+@Composable
+fun ScreenContent(
+    currentScreen: Screen,
+    onEvent: (String) -> Unit,
+    onInput: (id: String, value: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier) {
+        currentScreen.components.forEach { component ->
+            RenderComponent(
+                component = component,
+                onEvent = onEvent,
+                onInput = onInput
+            )
         }
     }
 }
@@ -69,49 +79,5 @@ private fun EmptyScreen() {
             text = "No jokes today!",
             style = MaterialTheme.typography.bodyLarge
         )
-    }
-}
-
-@Composable
-private fun JokesList(jokes: List<Joke>) {
-    LazyColumn {
-        items(jokes) { joke ->
-            JokeCard(joke)
-        }
-    }
-}
-
-@Composable
-private fun JokeCard(joke: Joke) {
-    Card(
-        Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(8.dp)
-        ) {
-            AsyncImage(
-                model = joke.iconUrl,
-                contentDescription = null,
-                modifier = Modifier.size(96.dp)
-            )
-            Spacer(Modifier.padding(8.dp))
-            Column {
-                Text(joke.value)
-                val context = LocalContext.current
-                Button(
-                    onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(joke.url))
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Go to Joke")
-                }
-            }
-        }
     }
 }
