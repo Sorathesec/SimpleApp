@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Test Application</string>
+    <string name="blurb">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Euismod quis viverra nibh cras pulvinar mattis. Nunc mattis enim ut tellus elementum sagittis vitae et. Non blandit massa enim nec dui nunc mattis enim ut. Dictumst quisque sagittis purus sit amet volutpat consequat.</string>
+    <string name="title">This is a title with an accent background!</string>
 </resources>

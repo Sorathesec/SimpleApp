@@ -1,20 +1,19 @@
 package com.netaphous.testapplication.ui
 
-import android.content.Intent
-import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,10 +23,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
+import com.netaphous.testapplication.R
+import com.netaphous.testapplication.data.ColorPalette
 
 @Composable
 fun Screen() {
@@ -37,14 +38,15 @@ fun Screen() {
     ) {
         val viewModel: ScreenViewModel = viewModel()
         LaunchedEffect(viewModel) {
-            viewModel.getJoke()
+            viewModel.getNewPalette()
         }
-        val screenState by viewModel.jokes.collectAsState()
+        val screenState by viewModel.palette.collectAsState()
 
+        val errorMessage = screenState.errorMessage
         when {
             screenState.showLoading -> LoadingScreen()
-            screenState.jokes.isEmpty() -> EmptyScreen()
-            else -> JokesList(screenState.jokes)
+            errorMessage != null -> ErrorScreen(errorMessage, viewModel::getNewPalette)
+            else -> ColorPaletteScreen(screenState.palette, viewModel::getNewPalette)
         }
     }
 }
@@ -60,58 +62,71 @@ private fun LoadingScreen() {
 }
 
 @Composable
-private fun EmptyScreen() {
-    Box(
-        contentAlignment = Alignment.Center,
+private fun ErrorScreen(errorMessage: String, fetchNewPalette: () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text(
-            text = "No jokes today!",
-            style = MaterialTheme.typography.bodyLarge
+        Icon(
+            painter = painterResource(R.drawable.baseline_error_24),
+            contentDescription = null,
+            modifier = Modifier.size(128.dp)
         )
-    }
-}
-
-@Composable
-private fun JokesList(jokes: List<Joke>) {
-    LazyColumn {
-        items(jokes) { joke ->
-            JokeCard(joke)
+        Spacer(Modifier.padding(16.dp))
+        Text(errorMessage)
+        Spacer(Modifier.padding(16.dp))
+        Button(onClick = fetchNewPalette) {
+            Text("Try Again!")
         }
     }
 }
 
 @Composable
-private fun JokeCard(joke: Joke) {
-    Card(
-        Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
+private fun ColorPaletteScreen(palette: ColorPalette, fetchNewPalette: () -> Unit) {
+    val accent = if (isSystemInDarkTheme()) {
+        palette.darkAccent
+    } else {
+        palette.lightAccent
+    }
+    val background = if (isSystemInDarkTheme()) {
+        palette.darkBackground
+    } else {
+        palette.lightBackground
+    }
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(background)
+            .padding(horizontal = 16.dp)
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(8.dp)
+            Modifier
+                .background(accent)
+                .padding(8.dp)
         ) {
-            AsyncImage(
-                model = joke.iconUrl,
-                contentDescription = null,
-                modifier = Modifier.size(96.dp)
+            Text(
+                text = stringResource(R.string.title),
+                color = palette.primary,
+                style = MaterialTheme.typography.headlineMedium
             )
-            Spacer(Modifier.padding(8.dp))
-            Column {
-                Text(joke.value)
-                val context = LocalContext.current
-                Button(
-                    onClick = {
-                        context.startActivity(
-                            Intent(Intent.ACTION_VIEW, Uri.parse(joke.url))
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Go to Joke")
-                }
-            }
+        }
+        Spacer(Modifier.padding(8.dp))
+        Text(
+            text = stringResource(R.string.blurb),
+            color = palette.primary
+        )
+        Spacer(Modifier.padding(16.dp))
+        Button(
+            onClick = fetchNewPalette,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = accent,
+                contentColor = palette.primary
+            )
+        ) {
+            Text("Try Another!")
         }
     }
 }
