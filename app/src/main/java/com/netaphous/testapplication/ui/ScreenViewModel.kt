@@ -13,19 +13,17 @@ import javax.inject.Inject
 class ScreenViewModel @Inject constructor(
     private val colorPaletteProvider: ColorPaletteProvider,
 ) : ViewModel() {
-    private val _palette = MutableStateFlow(ScreenState(showLoading = true))
-    val palette: StateFlow<ScreenState> = _palette
+    private val _screenState = MutableStateFlow(ScreenState(showLoading = true))
+    val screenState: StateFlow<ScreenState> = _screenState
     fun getNewPalette() {
+        _screenState.value = ScreenState(showLoading = true)
         viewModelScope.launch {
-            _palette.emit(ScreenState(showLoading = true))
-            _palette.emit(
-                when (val result = colorPaletteProvider.getColorPalette()) {
-                    is ColorPaletteProvider.Result.Success ->
-                        ScreenState(palette = result.palette)
-                    is ColorPaletteProvider.Result.Failed ->
-                        ScreenState(errorMessage = result.errorMessage)
-                }
-            )
+            _screenState.value = when (val result = colorPaletteProvider.getColorPalette()) {
+                is ColorPaletteProvider.Result.Success ->
+                    ScreenState(palette = result.palette)
+                is ColorPaletteProvider.Result.Failed ->
+                    ScreenState(errorMessage = result.errorMessage)
+            }
         }
     }
 }

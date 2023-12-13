@@ -40,7 +40,7 @@ fun Screen() {
         LaunchedEffect(viewModel) {
             viewModel.getNewPalette()
         }
-        val screenState by viewModel.palette.collectAsState()
+        val screenState by viewModel.screenState.collectAsState()
 
         val errorMessage = screenState.errorMessage
         when {
@@ -109,7 +109,6 @@ private fun ColorPaletteScreen(palette: ColorPalette, fetchNewPalette: () -> Uni
         ) {
             Text(
                 text = stringResource(R.string.title),
-                color = palette.primary,
                 style = MaterialTheme.typography.headlineMedium
             )
         }
@@ -122,8 +121,7 @@ private fun ColorPaletteScreen(palette: ColorPalette, fetchNewPalette: () -> Uni
         Button(
             onClick = fetchNewPalette,
             colors = ButtonDefaults.buttonColors(
-                containerColor = accent,
-                contentColor = palette.primary
+                containerColor = palette.primary,
             )
         ) {
             Text("Try Another!")
