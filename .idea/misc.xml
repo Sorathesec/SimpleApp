@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CMakeSettings">
     <configurations>
@@ -5,8 +6,9 @@
     </configurations>
   </component>
   <component name="EntryPointsManager">
-    <list size="1">
+    <list size="2">
       <item index="0" class="java.lang.String" itemvalue="dagger.Provides" />
+      <item index="1" class="java.lang.String" itemvalue="org.junit.jupiter.api.extension.RegisterExtension" />
     </list>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
